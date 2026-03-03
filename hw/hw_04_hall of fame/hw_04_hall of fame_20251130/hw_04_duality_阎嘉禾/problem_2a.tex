@@ -1,0 +1,15 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{setspace}
+\begin{document}
+	\begin{itemize}
+		\item [2. a)]
+		Define following symbols that stand for LP problems:\\
+		P: min $c^\mathrm{T}x$ s.t. $Ax=b,x\geq0$\\
+		Q: min $\hat{c}^\mathrm{T}x$ s.t. $Ax=b,x\geq0$\\ \\
+		
+		Since $x^*$ is an optimal solution to P, we have $c^\mathrm{T}x^* \leq c^\mathrm{T}\hat{x}$. Similarly, since $\hat{x}$ is an optimal solution to Q, we have $\hat{c}^\mathrm{T}\hat{x} \leq \hat{c}^\mathrm{T}x^*$.\\
+		So $(\hat{c}-c)^\mathrm{T}(\hat{x}-x^*)=(c^\mathrm{T}x^*-c^\mathrm{T}\hat{x})+(\hat{c}^\mathrm{T}\hat{x}-\hat{c}^\mathrm{T}x^*)\leq 0.$
+	\end{itemize}
+\end{document}

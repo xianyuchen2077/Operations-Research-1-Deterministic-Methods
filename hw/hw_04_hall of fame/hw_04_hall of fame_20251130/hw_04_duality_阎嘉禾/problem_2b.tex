@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{setspace}
+\begin{document}
+	\begin{itemize}
+		\item [2. b)]
+		Define following symbols that stand for LP problems:\\
+		P: min $c^\mathrm{T}x$ s.t. $Ax=b,x\geq0$\\
+		R: min $c^\mathrm{T}x$ s.t. $Ax=\widetilde{b},x\geq0$\\
+		DP: Dual of P, which should be: max $b^\mathrm{T}\pi$ s.t. $A^\mathrm{T}\pi\leq c,\pi~u.r.s.$\\
+		DR: Dual of R, which should be: max $\widetilde{b}^\mathrm{T}\pi$ s.t. $A^\mathrm{T}\pi\leq c,\pi~u.r.s.$\\ \\
+			
+		Since $x^*$ and $\pi ^*$ are optimal solutions to P and DP respectively, we have $c^\mathrm{T}x^*=(\pi ^*)^\mathrm{T}b$.
+		Let $\widetilde{\pi}$ be an optimal solution to DR, then similarly, $c^\mathrm{T}\widetilde{x}=\widetilde{\pi}^\mathrm{T}\widetilde{b}$.\\
+		Meanwhile, since $\widetilde{\pi}$ is an optimal solution to DR, we have $(\pi ^*)^\mathrm{T}\widetilde{b} \leq \widetilde{\pi}^\mathrm{T}\widetilde{b}$.\\
+		So $(\pi ^*)^\mathrm{T}(\widetilde{b}-b)-c^\mathrm{T}(\widetilde{x}-x^*)\\
+		=(c^\mathrm{T}x^*-(\pi ^*)^\mathrm{T}b)+((\pi ^*)^\mathrm{T}\widetilde{b}-c^\mathrm{T}\widetilde{x})\\
+		=0+(\pi ^*)^\mathrm{T}\widetilde{b}-c^\mathrm{T}\widetilde{x}\\
+		\leq\widetilde{\pi}^\mathrm{T}\widetilde{b}-c^\mathrm{T}\widetilde{x}\\
+		=0$.
+	\end{itemize}
+\end{document}

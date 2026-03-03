@@ -1,0 +1,55 @@
+import gurobipy as gp
+from gurobipy import GRB
+
+# 创建模型
+model = gp.Model("Integer_WorkerScheduling")
+
+# 决策变量
+x = model.addVars(5, vtype=GRB.INTEGER, name="x")
+y = model.addVars(5, vtype=GRB.INTEGER, name="y")
+
+# 约束条件
+model.addConstr(x[0] == 50, name="x")
+for t in range(1, 5):
+    model.addConstr(x[t - 1] + y[t - 1] - x[t] <= 0.05 * x[t - 1])
+    model.addConstr(x[t - 1] + y[t - 1] - x[t] >= 0)
+
+model.addConstr(160 * x[0] - 50 * y[0] >= 6000, name="January")
+model.addConstr(160 * x[1] - 50 * y[1] >= 7000, name="February")
+model.addConstr(160 * x[2] - 50 * y[2] >= 8000, name="March")
+model.addConstr(160 * x[3] - 50 * y[3] >= 9500, name="April")
+model.addConstr(160 * x[4] - 50 * y[4] >= 11000, name="May")
+
+# 目标函数
+obj = gp.LinExpr()
+for i in range(5):
+    obj += 2000 * x[i]
+model.setObjective(obj, GRB.MINIMIZE)
+
+# 求解模型
+model.optimize()
+
+# 输出结果
+if model.status == GRB.OPTIMAL:
+    print("问题(a)最优解:")
+    for i in range(5):
+        print(f"第{i + 1}个月: 全职技术人员 = {x[i].x}, 新培训技术人员 = {y[i].x if i < 4 else 0}")
+    print(f"目标函数值: {model.objVal}")
+else:
+    print("没有找到最优解.")
+    
+# 修改四月和五月的生产需求约束
+model.setAttr('RHS', model.getConstrByName('April'), 9000)
+model.setAttr('RHS', model.getConstrByName('May'), 10000)
+
+# 重新求解模型
+model.optimize()
+
+# 输出新的结果
+if model.status == GRB.OPTIMAL:
+    print("修改需求后的最优解:")
+    for i in range(5):
+        print(f"第{i + 1}个月: 全职技术人员 = {x[i].x}, 新培训技术人员 = {y[i].x if i < 4 else 0}")
+    print(f"目标函数值: {model.objVal}")
+else:
+    print("没有找到修改需求后的最优解.")

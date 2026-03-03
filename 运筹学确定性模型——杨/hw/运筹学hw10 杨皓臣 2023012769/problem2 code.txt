@@ -1,0 +1,98 @@
+import gurobipy as gp
+
+# 创建模型
+model = gp.Model("MachineProductSelection")
+
+# 定义决策变量
+x = {}
+for i in range(1, 6):
+    x[i] = model.addVar(vtype=gp.GRB.INTEGER, name=f'x_{i}')
+y = {}
+for i in range(1, 5):
+    y[i] = model.addVar(vtype=gp.GRB.BINARY, name=f'y_{i}')
+z = {}
+for i in range(1, 6):
+    z[i] = model.addVar(vtype=gp.GRB.BINARY, name=f'z_{i}')  
+t = model.addVar(vtype=gp.GRB.BINARY, name='t') 
+
+# 设置目标函数
+model.setObjective(
+    gp.quicksum([11 * x[1], 14 * x[2], 8 * x[3], 15 * x[4], 9 * x[5]]),
+    gp.GRB.MAXIMIZE
+)
+
+# 添加约束条件
+M = 1000
+
+# 机器工作时间约束，命名为machine_time_constraint_1到machine_time_constraint_4
+model.addConstr(5 * x[1] + 8 * x[2] + 4 * x[3] + 9 * x[4] + 7 * x[5] <= 180 + M * (1 - y[1]), name='machine_time_constraint_1')
+model.addConstr(7 * x[1] + 11 * x[2] + 3 * x[3] + 10 * x[4] + 7 * x[5] <= 230 + M * (1 - y[2]), name='machine_time_constraint_2')
+model.addConstr(4 * x[1] + 9 * x[2] + 3 * x[3] + 8 * x[4] + 6 * x[5] <= 170 + M * (1 - y[3]), name='machine_time_constraint_3')
+model.addConstr(3 * x[1] + 7 * x[2] + 5 * x[3] + 9 * x[4] + 5 * x[5] <= 165 + M * (1 - y[4]), name='machine_time_constraint_4')
+
+# 产品生产数量限制约束，命名为product_quantity_constraint_1到product_quantity_constraint_5
+model.addConstr(x[1] <= 21 * z[1], name='product_quantity_constraint_1')
+model.addConstr(x[2] <= 25 * z[2], name='product_quantity_constraint_2')
+model.addConstr(x[3] <= 23 * z[3], name='product_quantity_constraint_3')
+model.addConstr(x[4] <= 15 * z[4], name='product_quantity_constraint_4')
+model.addConstr(x[5] <= 18 * z[5], name='product_quantity_constraint_5')
+
+# 产品选择约束
+model.addConstr(z[1] + z[2] + z[3] + z[4] + z[5] <= 3)
+model.addConstr(y[1] + y[2] + y[3] + y[4] == 2)
+
+# 产品与机器的关联约束
+model.addConstr(y[3] >= z[1] + z[3] + z[4] - 2)
+model.addConstr(y[3] <= 1 - z[2])
+model.addConstr(x[1]+M*(1-y[1]) >= x[2])
+model.addConstr(x[1]+M*(1-y[2]) >= x[2])
+model.addConstr(x[1]+M*(1-y[4]) >= x[2])
+
+# 产品数量关系约束
+model.addConstr(x[2] <= x[3])
+model.addConstr(x[2] <= x[5])
+model.addConstr(x[2] >= x[3] - M * t)
+model.addConstr(x[2] >= x[5] - M * (1 - t))
+model.addConstr(x[3] - x[5] <= M * (1 - t))
+model.addConstr(x[5] - x[3] <= M * t)
+
+# 优化模型
+model.optimize()
+
+# 输出结果
+if model.status == gp.GRB.OPTIMAL:
+    print('最优利润：', model.objVal)
+    for i in range(1, 6):
+        print(f'产品{i}的生产数量：{x[i].x}')
+    for i in range(1, 5):
+        if y[i].x > 0:
+            print(f'机器{i}被选中')
+    for j in range(1, 6):
+        if z[j].x > 0:
+            print(f'产品{j}被选中生产')
+else:
+    print('未找到最优解')
+
+# 修改机器2生产产品C的时间系数
+model.chgCoeff(model.getConstrByName('machine_time_constraint_2'), x[3], 9)
+
+# 修改机器3生产产品C的时间系数
+model.chgCoeff(model.getConstrByName('machine_time_constraint_3'), x[3], 11)
+
+model.update()
+# 重新优化模型
+model.optimize()
+
+# 输出结果
+if model.status == gp.GRB.OPTIMAL:
+    print('新问题的最优利润：', model.objVal)
+    for i in range(1, 6):
+        print(f'产品{i}的生产数量：{x[i].x}')
+    for i in range(1, 5):
+        if y[i].x > 0:
+            print(f'机器{i}被选中')
+    for j in range(1, 6):
+        if z[j].x > 0:
+            print(f'产品{j}被选中生产')
+else:
+    print('未找到最优解')
